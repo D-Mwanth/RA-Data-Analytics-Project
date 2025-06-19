@@ -16,25 +16,29 @@ Why include missing licenses:
 - Absence in `dim_license` is treated as a data quality issue — assume best-case (i.e., granted and active).
 */
 
+-- =============================================================================
+-- Drop and Create a View
+-- =============================================================================
+IF OBJECT_ID('gold.vw_active_license_counts_by_crop', 'V') IS NOT NULL
+    DROP VIEW gold.vw_active_license_counts_by_crop;
+GO
+
+CREATE VIEW gold.vw_active_license_counts_by_crop AS
 SELECT
     dc.crop AS crop_name,
     COUNT(DISTINCT fr.dim_license_id) AS active_license_count
-FROM 
+FROM
     gold.fct_registration fr
-JOIN 
-    gold.dim_crop dc 
+JOIN
+    gold.dim_crop dc
     ON fr.dim_crop_id = dc.dim_crop_id
-LEFT JOIN 
-    gold.dim_license dl 
+LEFT JOIN
+    gold.dim_license dl
     ON fr.dim_license_id = dl.dim_license_id
-WHERE 
-    dl.license_status = 'Granted' -- not Expired
+WHERE
+    dl.license_status = 'Granted'
     OR dl.license_status IS NULL
-    OR dl.dim_license_id IS NULL  -- license missing from dim_license, assume active
-GROUP BY 
+    OR dl.dim_license_id IS NULL -- license missing from dim_license, assume active
+GROUP BY
     dc.crop
-ORDER BY 
-    active_license_count DESC;
-
-
---==================================
+GO

@@ -55,4 +55,36 @@ Failed assumption:
     1. If the license signdate is between 2021 and 2022, and license status is missing then can be considered Granted
     Why Failed:
         - There case of licenses which were signed within that durationa and status is Expired.
-/
+*/
+
+-- =============================================================================
+-- Drop and Create a View
+-- =============================================================================
+
+IF OBJECT_ID('gold.vw_license_status_counts', 'V') IS NOT NULL
+    DROP VIEW gold.vw_license_status_counts;
+GO
+
+CREATE VIEW gold.vw_license_status_counts AS
+SELECT 
+    license_status,
+    COUNT(*) AS number_of_licenses
+FROM (
+    -- Status from dim_license table
+    SELECT license_status
+    FROM gold.dim_license
+
+    UNION ALL
+
+    -- Assume "Granted" for registrations missing from dim_license
+    SELECT 'Granted' AS license_status
+    FROM gold.fct_registration f
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM gold.dim_license d
+        WHERE d.dim_license_id = f.dim_license_id
+    )
+) AS combined
+WHERE license_status IS NOT NULL
+GROUP BY license_status;
+GO

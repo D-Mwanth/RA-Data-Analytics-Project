@@ -4,6 +4,14 @@
 -- Note: Includes members missing from dim_member
 -- ==========================================
 
+-- =============================================================================
+-- Drop and Create a View
+-- =============================================================================
+IF OBJECT_ID('gold.vw_member_farm_site_summary', 'V') IS NOT NULL
+    DROP VIEW gold.vw_member_farm_site_summary;
+GO
+
+CREATE VIEW gold.vw_member_farm_site_summary AS
 SELECT
     COALESCE(dm.member_name, fr.dim_member_id) AS member_name_or_id,
     COUNT(DISTINCT fr.dim_farm_id) AS number_of_farms,
